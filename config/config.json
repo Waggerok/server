@@ -1,0 +1,9 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "12345",
+    "database": "tgshop-database",
+    "host": "localhost",
+    "dialect": "postgres"
+  }
+}
