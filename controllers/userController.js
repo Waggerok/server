@@ -74,6 +74,16 @@ class UserController {
             res.status(500).json({ message: 'Ошибка при назначении роли пользователя', error });
         }
     }
+    async getAllUsers (req,res) {
+        try {
+            const users = await User.findAll();
+
+            return res.status(200).json(users)
+        } catch(error) {
+            console.error('Error during fetching all users', error);
+            res.status(500).json({ message: 'Ошибка при получении всех пользователей', error })
+        }
+    }
 }
 
 module.exports = new UserController();
