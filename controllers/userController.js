@@ -84,6 +84,20 @@ class UserController {
             res.status(500).json({ message: 'Ошибка при получении всех пользователей', error })
         }
     }
+    async getAdmins (req,res) {
+        try {
+            const admins = await User.findAll({ where: { role : 'ADMIN' } })
+
+            if (admins.length === 0) {
+                res.status(404).json({ message: 'Администраторы не найдены' })
+            }
+
+            res.status(200).json(admins);
+        } catch(error) {
+            console.error('Ошибка при получении пользователей с ролью ADMIN', error);
+            res.status(500).json({ message: 'Ошибка при получении администраторов', error })
+        }
+    }
 }
 
 module.exports = new UserController();
