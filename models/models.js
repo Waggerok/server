@@ -32,7 +32,8 @@ const Device = sequelize.define('device', {
 
 const BasketDevice = sequelize.define('basket_device', {
     id : {type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true},
-    deviceId : {type: DataTypes.INTEGER, allowNull: false, references: {model: Device, key: 'id'}}
+    deviceId : {type: DataTypes.INTEGER, allowNull: false, references: {model: Device, key: 'id'}},
+    quantity: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 }, // Новое поле
 });
 
 const DeviceFilter = sequelize.define('device_filter', {

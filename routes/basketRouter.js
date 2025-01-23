@@ -10,4 +10,6 @@ router.delete('/:telegram_id/device/:deviceId', BasketController.deleteDeviceFro
 
 router.delete('/:telegram_id/clear', BasketController.clearBasket);
 
+router.post('/updateQuantity', BasketController.updateDeviceQuantity);
+
 module.exports = router;
