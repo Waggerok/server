@@ -11,7 +11,7 @@ class OrderController {
                 return res.status(400).json({ message : 'Пользователь не найден' });
             };
 
-            const orders = await Order.findAll({ where: {telegram_id} });
+            const orders = await Order.findAll({ where: { userTelegramId: telegram_id } });
             if (!orders.length) {
                 return res.status(400).json({ message : 'Заказы не найдены' });
             };
