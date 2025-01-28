@@ -33,7 +33,7 @@ class BasketController {
 
     async addDeviceToBasket(req, res) {
         try {
-            const { telegram_id, deviceId, quantity } = req.body;
+            const { telegram_id, deviceId, quantity = 1 } = req.body;
 
             let basket = await Basket.findOne({ where: { userTelegramId: telegram_id } });
             if (!basket) {
