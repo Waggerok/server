@@ -23,27 +23,28 @@ class OrderController {
         };
     };
 
-    async createOrder(req,res) {
+    async createOrder(req, res) {
         try {
             const { telegram_id, address, total_price } = req.body;
-
-            const user = await User.findOne({ where: {telegram_id} });
+    
+            const user = await User.findOne({ where: { telegram_id } });
             if (!user) {
-                return res.status(400).json({ message : 'Пользователя не существует' });
-            };
-
+                return res.status(400).json({ message: 'Пользователя не существует' });
+            }
+    
             const order = await Order.create({
-                telegram_id,
+                userTelegramId: telegram_id,  // <-- исправлено
                 address,
                 total_price
             });
-
-            return res.status(201).json( {message : 'Заказ успешно создан', order});
-        } catch(error) {
+    
+            return res.status(201).json({ message: 'Заказ успешно создан', order });
+        } catch (error) {
             console.error('Error with creating order', error);
-            res.status(500).json( { message: 'Заказ не создался', error});
+            res.status(500).json({ message: 'Заказ не создался', error });
         }
     }
+    
 
     async deleteOrder(req,res) {
         try {
