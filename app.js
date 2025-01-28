@@ -16,7 +16,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 //App
-app.use(cors());
+app.use(cors({
+    origin: 'https://telegramshop.netlify.app', // Разрешенный источник
+    credentials: true, // Разрешаем куки, если нужно
+    methods: 'GET, POST, PUT, DELETE, OPTIONS',
+    allowedHeaders: 'Content-Type, Authorization',
+}));
+
 app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'uploads/images')))
 app.use(express.static(path.resolve(__dirname, 'uploads/models')))
