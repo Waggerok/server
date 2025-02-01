@@ -35,6 +35,11 @@ class BasketController {
         try {
             const { telegram_id, deviceId, quantity = 1 } = req.body;
 
+            const user = await User.findOne({ where: { telegram_id } });
+            if (!user) {
+                return res.status(404).json({ message: 'Пользователь не найден' });
+            }
+
             let basket = await Basket.findOne({ where: { userTelegramId: telegram_id } });
             if (!basket) {
                 basket = await Basket.create({ userTelegramId: telegram_id });
