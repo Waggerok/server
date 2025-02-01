@@ -31,27 +31,33 @@ class BasketController {
         }
     }
 
-    async createBasketForUser(req,res) {
+    async createBasketForUser(req, res) {
         try {
             const { telegram_id } = req.body;
-            
-            const user = await User.findOne({ where: {telegram_id} });
-            if (!user) {
-                return res.status(404).json({ message: 'Такого пользователя не существует' })
-            }          
-            
-            const basket = await Basket.findOne({ where: { userTelegramId : telegram_id } });
-            if (!basket) {
-                basket = await Basket.create({ userTelegramId : telegram_id });
-                console.log(`Корзина для пользователя ${telegram_id} успешно создана`);
+            console.log('Создание корзины для пользователя:', telegram_id);
+    
+            if (!telegram_id) {
+                return res.status(400).json({ message: 'Не передан telegram_id' });
             }
-
-            return res.status(200).json({message : 'Корзина проверена/создана', basket});
-        } catch(error) {
-            console.error('Error during creating the basket', error);
-            return res.status(500).json({ message : 'Ошибка при создании корзины', error });
+    
+            let user = await User.findOne({ where: { telegram_id } });
+            if (!user) {
+                return res.status(404).json({ message: 'Пользователь не найден' });
+            }
+    
+            let basket = await Basket.findOne({ where: { userTelegramId: telegram_id } });
+            if (!basket) {
+                basket = await Basket.create({ userTelegramId: telegram_id });
+                console.log(`Корзина создана для пользователя ${telegram_id}`);
+            }
+    
+            return res.status(200).json({ message: 'Корзина проверена/создана', basket });
+        } catch (error) {
+            console.error('Ошибка при создании корзины:', error);
+            return res.status(500).json({ message: 'Ошибка при создании корзины', error });
         }
     }
+    
 
     async addDeviceToBasket(req, res) {
         try {
