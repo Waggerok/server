@@ -33,22 +33,22 @@ class BasketController {
 
     async createBasketForUser(req, res) {
         try {
-            const { telegram_id } = req.body;
-            console.log('Создание корзины для пользователя:', telegram_id);
+            const { userTelegramId } = req.body;
+            console.log('Создание корзины для пользователя:', userTelegramId);
     
-            if (!telegram_id) {
+            if (!userTelegramId) {
                 return res.status(400).json({ message: 'Не передан telegram_id' });
             }
     
-            let user = await User.findOne({ where: { telegram_id } });
+            let user = await User.findOne({ where: { telegram_id: userTelegramId } });
             if (!user) {
                 return res.status(404).json({ message: 'Пользователь не найден' });
             }
     
-            let basket = await Basket.findOne({ where: { userTelegramId: telegram_id } });
+            let basket = await Basket.findOne({ where: { userTelegramId } });
             if (!basket) {
-                basket = await Basket.create({ userTelegramId: telegram_id });
-                console.log(`Корзина создана для пользователя ${telegram_id}`);
+                basket = await Basket.create({ userTelegramId });
+                console.log(`Корзина создана для пользователя ${userTelegramId}`);
             }
     
             return res.status(200).json({ message: 'Корзина проверена/создана', basket });
