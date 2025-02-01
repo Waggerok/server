@@ -31,6 +31,28 @@ class BasketController {
         }
     }
 
+    async createBasketForUser(req,res) {
+        try {
+            const { telegram_id } = req.body;
+            
+            const user = await User.findOne({ where: {telegram_id} });
+            if (!user) {
+                return res.status(404).json({ message: 'Такого пользователя не существует' })
+            }          
+            
+            const basket = await Basket.findOne({ where: { userTelegramId : telegram_id } });
+            if (!basket) {
+                basket = await Basket.create({ userTelegramId : telegram_id });
+                console.log(`Корзина для пользователя ${telegram_id} успешно создана`);
+            }
+
+            return res.status(200).json({message : 'Корзина проверена/создана', basket});
+        } catch(error) {
+            console.error('Error during creating the basket', error);
+            return res.status(500).json({ message : 'Ошибка при создании корзины', error });
+        }
+    }
+
     async addDeviceToBasket(req, res) {
         try {
             const { telegram_id, deviceId, quantity = 1 } = req.body;

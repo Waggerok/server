@@ -12,4 +12,6 @@ router.delete('/:telegram_id/clear', BasketController.clearBasket);
 
 router.post('/updateQuantity', BasketController.updateDeviceQuantity);
 
+router.post('/create-basket', BasketController.createBasketForUser);
+
 module.exports = router;
