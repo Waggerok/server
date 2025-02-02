@@ -2,48 +2,67 @@ const {User} = require('../models/models');
 const {Order} = require('../models/models');
 
 class OrderController {
-    async getUsersOrders(req,res) {
+    async getUsersOrders(req, res) {
         try {   
             const { telegram_id } = req.params;
-
-            const user = await User.findOne({ where: {telegram_id} });
+    
+            // Проверяем, существует ли пользователь
+            const user = await User.findOne({ where: { telegram_id } });
             if (!user) {
                 return res.status(400).json({ message : 'Пользователь не найден' });
-            };
-
-            const orders = await Order.findAll({ where: { userTelegramId: telegram_id } });
+            }
+    
+            // Получаем заказы пользователя
+            const orders = await Order.findAll({
+                where: { userTelegramId: telegram_id },
+                attributes: ['id', 'total_price', 'address', 'items', 'createdAt', 'updatedAt']
+            });
+    
             if (!orders.length) {
                 return res.status(400).json({ message : 'Заказы не найдены' });
-            };
-
+            }
+    
             return res.status(200).json(orders);
-        } catch(error) {
-            console.error('Error fetching orders', error);
-            res.status(500).json( { message : 'Ошибка при получении заказов', error});
-        };
-    };
+        } catch (error) {
+            console.error('Ошибка при получении заказов:', error);
+            res.status(500).json({ message: 'Ошибка при получении заказов', error });
+        }
+    }
+    
 
     async createOrder(req, res) {
         try {
-            const { telegram_id, address, total_price } = req.body;
+            const { userTelegramId, address } = req.body;
     
-            const user = await User.findOne({ where: { telegram_id } });
-            if (!user) {
-                return res.status(400).json({ message: 'Пользователя не существует' });
+            // Получаем товары из корзины пользователя
+            const basketItems = await BasketDevice.findAll({ where: { userTelegramId } });
+    
+            if (!basketItems.length) {
+                return res.status(400).json({ message: 'Корзина пуста' });
             }
     
-            const order = await Order.create({
-                userTelegramId: telegram_id,  // <-- исправлено
-                address,
-                total_price
-            });
+            // Формируем массив товаров
+            const items = basketItems.map(item => ({
+                deviceId: item.deviceId,
+                quantity: item.quantity
+            }));
     
-            return res.status(201).json({ message: 'Заказ успешно создан', order });
+            // Считаем общую сумму заказа
+            const total_price = basketItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+    
+            // Создаем заказ
+            const order = await Order.create({ userTelegramId, total_price, address, items });
+    
+            // Очищаем корзину пользователя
+            await BasketDevice.destroy({ where: { userTelegramId } });
+    
+            return res.status(200).json({ message: 'Заказ оформлен', order });
         } catch (error) {
-            console.error('Error with creating order', error);
-            res.status(500).json({ message: 'Заказ не создался', error });
+            console.error('Ошибка при создании заказа:', error);
+            return res.status(500).json({ message: 'Ошибка при создании заказа', error });
         }
     }
+    
     
 
     async deleteOrder(req,res) {
