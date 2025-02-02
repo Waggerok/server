@@ -32,48 +32,46 @@ class OrderController {
 
     async createOrder(req, res) {
         try {
-            const { userTelegramId, address, items } = req.body;
+            console.log("Полученные данные:", req.body);
     
-            console.log("Создание заказа: ", { userTelegramId, address, items });
+            const { telegram_id, address, items } = req.body;
     
-            // Проверяем, переданы ли товары
-            if (!items || !Array.isArray(items) || items.length === 0) {
-                return res.status(400).json({ message: "Ошибка: товары не переданы" });
+            if (!telegram_id) {
+                return res.status(400).json({ message: "Ошибка: отсутствует telegram_id" });
             }
     
             // Проверяем, есть ли пользователь
-            const user = await User.findOne({ where: { telegram_id: userTelegramId } });
+            const user = await User.findOne({ where: { telegram_id } });
             if (!user) {
                 return res.status(400).json({ message: "Ошибка: пользователь не найден" });
             }
     
-            // Считаем общую стоимость заказа
+            // Проверяем, есть ли товары в заказе
+            if (!items || !Array.isArray(items) || items.length === 0) {
+                return res.status(400).json({ message: "Ошибка: товары не переданы" });
+            }
+    
+            // Считаем общую стоимость
             const total_price = items.reduce((sum, item) => sum + (item.quantity * item.price || 0), 0);
     
             console.log("Общая стоимость заказа:", total_price);
     
             // Создаем заказ
-            const order = await Order.create({ 
-                userTelegramId, 
-                total_price, 
-                address, 
-                items: JSON.stringify(items) // Сохраняем массив товаров в виде строки JSON
+            const order = await Order.create({
+                userTelegramId: telegram_id,
+                total_price,
+                address,
+                items: JSON.stringify(items)
             });
     
             console.log("Заказ успешно создан:", order);
-    
-            // Очищаем корзину пользователя
-            await BasketDevice.destroy({ where: { userTelegramId } });
     
             return res.status(200).json({ message: "Заказ оформлен", order });
         } catch (error) {
             console.error("Ошибка при создании заказа:", error);
             return res.status(500).json({ message: "Ошибка при создании заказа", error: error.message });
         }
-    }
-    
-    
-    
+    }   
 
     async deleteOrder(req,res) {
         try {
