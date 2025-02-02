@@ -32,36 +32,46 @@ class OrderController {
 
     async createOrder(req, res) {
         try {
-            const { userTelegramId, address } = req.body;
+            const { userTelegramId, address, items } = req.body;
     
-            // Получаем товары из корзины пользователя
-            const basketItems = await BasketDevice.findAll({ where: { userTelegramId } });
+            console.log("Создание заказа: ", { userTelegramId, address, items });
     
-            if (!basketItems.length) {
-                return res.status(400).json({ message: 'Корзина пуста' });
+            // Проверяем, переданы ли товары
+            if (!items || !Array.isArray(items) || items.length === 0) {
+                return res.status(400).json({ message: "Ошибка: товары не переданы" });
             }
     
-            // Формируем массив товаров
-            const items = basketItems.map(item => ({
-                deviceId: item.deviceId,
-                quantity: item.quantity
-            }));
+            // Проверяем, есть ли пользователь
+            const user = await User.findOne({ where: { telegram_id: userTelegramId } });
+            if (!user) {
+                return res.status(400).json({ message: "Ошибка: пользователь не найден" });
+            }
     
-            // Считаем общую сумму заказа
-            const total_price = basketItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+            // Считаем общую стоимость заказа
+            const total_price = items.reduce((sum, item) => sum + (item.quantity * item.price || 0), 0);
+    
+            console.log("Общая стоимость заказа:", total_price);
     
             // Создаем заказ
-            const order = await Order.create({ userTelegramId, total_price, address, items });
+            const order = await Order.create({ 
+                userTelegramId, 
+                total_price, 
+                address, 
+                items: JSON.stringify(items) // Сохраняем массив товаров в виде строки JSON
+            });
+    
+            console.log("Заказ успешно создан:", order);
     
             // Очищаем корзину пользователя
             await BasketDevice.destroy({ where: { userTelegramId } });
     
-            return res.status(200).json({ message: 'Заказ оформлен', order });
+            return res.status(200).json({ message: "Заказ оформлен", order });
         } catch (error) {
-            console.error('Ошибка при создании заказа:', error);
-            return res.status(500).json({ message: 'Ошибка при создании заказа', error });
+            console.error("Ошибка при создании заказа:", error);
+            return res.status(500).json({ message: "Ошибка при создании заказа", error: error.message });
         }
     }
+    
     
     
 

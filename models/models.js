@@ -13,7 +13,7 @@ const Order = sequelize.define('order', {
     id : {type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true},
     total_price : {type: DataTypes.FLOAT, allowNull: false},
     address : {type: DataTypes.STRING, allowNull: false},
-    items: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] }
+    items: { type: DataTypes.JSON, allowNull: false, defaultValue: [] }
 });
 
 const Basket = sequelize.define('basket', {
